@@ -1,0 +1,7 @@
+.env
+/srv
+/.srv
+/coverage
+/src/assests/components
+/node_modules
+npm-debug.log

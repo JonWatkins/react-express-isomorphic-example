@@ -1,0 +1,21 @@
+'use strict'
+
+import app from '../src/server/index'
+import config from '../src/config'
+
+const port = config().port
+
+app.set('port', port)
+
+app.start = () => {
+  let server = app.listen(app.get('port'), () => {
+    let msg = `Started on: ${server.address().port}`
+    console.log(msg)
+  })
+}
+
+if (!module.parent) {
+  app.start()
+}
+
+export default app

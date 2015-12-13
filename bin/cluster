@@ -1,0 +1,53 @@
+#!/usr/bin/env/node
+
+import app from './www'
+import os from 'os'
+import cluster from 'cluster'
+import config from '../src/config'
+
+if (!module.parent) {
+  
+  let server
+  
+  function envMax () {
+    let num = Number(process.env.NODE_CLUSTER);
+    if (!isNaN(num)) { return num }
+    return false;
+  }
+
+  let clusterNum,
+      maxClusters = envMax() || 8,
+      cpus = os.cpus().length
+
+  if (maxClusters < cpus) {
+    clusterNum = maxClusters
+  } else {
+    clusterNum = cpus
+  }
+
+  if (cluster.isMaster) {
+    for (let i = 0; i < clusterNum; i += 1) {
+      cluster.fork()
+    }
+
+    cluster.on('exit', function (deadWorker) {
+      let exitCode = deadWorker.process.exitCode
+      console.error('worker' + deadWorker.process.pid + ' died (' + exitCode + '). restarting...');
+      if( typeof cluster.workers[deadWorker.id] != "undefined" ) {
+        cluster.workers[deadWorker.id].delete()
+      }
+      cluster.fork()
+    });
+
+    cluster.on('online', function(worker) {
+      console.info('worker ' + worker.process.pid + ' - online');
+    });
+
+    console.info("running on port " + config().port + " in " + config().env + " mode.", true)
+  }
+
+  if (cluster.isWorker) {
+    app.start()
+  }
+
+}
