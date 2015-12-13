@@ -2,7 +2,7 @@
 /srv
 /.srv
 /coverage
-/src/assests/components
+src/assets/components/
 /node_modules
 npm-debug.log
 .sass-cache
